@@ -101,6 +101,7 @@ WARNING
         post_bundler
         create_database_yml
         install_binaries
+        run_db_migrate
         run_assets_precompile_rake_task
       end
       best_practice_warnings
@@ -783,6 +784,25 @@ params = CGI.parse(uri.query || "")
 
   def node_not_preinstalled?
     !node_js_installed?
+  end
+
+  def run_db_migrate
+    instrument 'ruby.run_db_migrate' do
+
+      migrate = rake.task("db:migrate")
+      return true unless migrate.is_defined?
+
+      topic "DB Migrate"
+      migrate.invoke(env: rake_env)
+      if migrate.success?
+        puts "**** DB Migration completed (#{"%.2f" % precompile.time}s) ****"
+      else
+        log "db_migration", :status => "failure"
+        msg = "db_migration failed.\n"
+        msg << precompile.output + "\n"
+        error msg
+      end
+    end
   end
 
   def run_assets_precompile_rake_task
