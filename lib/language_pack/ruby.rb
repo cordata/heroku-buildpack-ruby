@@ -795,11 +795,11 @@ params = CGI.parse(uri.query || "")
       topic "DB Migrate"
       migrate.invoke(env: rake_env)
       if migrate.success?
-        puts "**** DB Migration completed (#{"%.2f" % migrate.time}s) ****"
+        puts "**** DB Migration completed (#{"%.2f" % precompile.time}s) ****"
       else
         log "db_migration", :status => "failure"
         msg = "db_migration failed.\n"
-        msg << migrate.output + "\n"
+        msg << precompile.output + "\n"
         error msg
       end
     end
